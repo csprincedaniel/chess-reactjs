@@ -3,6 +3,9 @@ import './chessboard.css';
 import Tile from '../Tile/tile';
 import React from 'react';
 import {useRef, useState} from 'react'
+import Referee from "@/app/Referee/referee"
+
+
 const verticalAxis = ["1","2","3","4","5","6","7","8"];
 const horizontalAxis = ['a','b','c','d','e','f','g','h'];
 
@@ -10,29 +13,46 @@ interface Piece{
     image: string
     x: number
     y: number
+    type: PieceType
+    team: TeamType
+}
+
+export enum PieceType{
+    PAWN,
+    BISHOP,
+    KNIGHT,
+    ROOK,
+    QUEEN,
+    KING
+}
+
+export enum TeamType{
+    OPPONENT,
+    OUR
 }
 
 const pieces: Piece[] = []
 const initialBoardState: Piece[] = []
 
 for (let p = 0; p < 2; p++){
-    const type = (p === 0) ? "black" : "white"
+    const teamType = (p===0)? TeamType.OPPONENT : TeamType.OUR
+    const type = (teamType === TeamType.OPPONENT) ? "black" : "white"
     const y = (p === 0)? 7:0;
 
-    initialBoardState.push({image: `/pieces/${type}-rook.png`,x:0,y:y})
-    initialBoardState.push({image: `/pieces/${type}-rook.png`,x:7,y:y})
-    initialBoardState.push({image: `/pieces/${type}-knight.png`,x:1,y:y})
-    initialBoardState.push({image: `/pieces/${type}-knight.png`,x:6,y:y})
-    initialBoardState.push({image: `/pieces/${type}-bishop.png`,x:2,y:y})
-    initialBoardState.push({image: `/pieces/${type}-bishop.png`,x:5,y:y})
-    initialBoardState.push({image: `/pieces/${type}-queen.png`,x:3,y:y})
-    initialBoardState.push({image: `/pieces/${type}-king.png`,x:4,y:y})
+    initialBoardState.push({image: `/pieces/${type}-rook.png`,x:0,y:y, type: PieceType.ROOK, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-rook.png`,x:7,y:y, type: PieceType.ROOK, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-knight.png`,x:1,y:y, type: PieceType.KNIGHT, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-knight.png`,x:6,y:y, type: PieceType.KNIGHT, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-bishop.png`,x:2,y:y, type: PieceType.BISHOP, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-bishop.png`,x:5,y:y, type: PieceType.BISHOP, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-queen.png`,x:3,y:y, type: PieceType.QUEEN, team:teamType})
+    initialBoardState.push({image: `/pieces/${type}-king.png`,x:4,y:y, type: PieceType.KING, team:teamType})
 }
 
 
 for (let i = 0; i < 8; i++){
-    initialBoardState.push({image: "/pieces/black-pawn.png",x:i,y:6})
-    initialBoardState.push({image: "/pieces/white-pawn.png",x:i,y:1})
+    initialBoardState.push({image: "/pieces/black-pawn.png",x:i,y:6, type: PieceType.PAWN, team:TeamType.OPPONENT})
+    initialBoardState.push({image: "/pieces/white-pawn.png",x:i,y:1, type: PieceType.PAWN, team:TeamType.OUR})
 }
 
 let activePiece: HTMLElement | null = null
@@ -40,6 +60,7 @@ let activePiece: HTMLElement | null = null
 
 
 export default function Chessboard() {
+    const referee = new Referee()
     const chessboardRef = useRef<HTMLDivElement>(null)
     const [pieces, setPieces] = useState<Piece[]>(initialBoardState)
     const [gridX, setX] = useState(0)
@@ -119,11 +140,21 @@ export default function Chessboard() {
             const x = Math.floor((e.clientX - chessboard.offsetLeft) / tileSize);
             const y = 7 - Math.floor((e.clientY - chessboard.offsetTop) / tileSize);
             console.log(x,y)
+            
+
+            //UPDATES THE PIECE POSITION
             setPieces((value) => {
                 const pieces = value.map(p=>{
                     if(p.x === gridX && p.y === gridY){
-                        p.x = x
-                        p.y = y
+                        const valid = referee.isValueMove(gridX, gridY, x,y, p.type, p.team)
+                        if (valid){
+                            p.x = x
+                            p.y = y
+                        } else {
+                            activePiece.style.position = 'relative'
+                            activePiece.style.removeProperty('top')
+                            activePiece.style.removeProperty('left')
+                        }
                     }
                     return p
                 })
