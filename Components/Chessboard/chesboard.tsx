@@ -9,7 +9,7 @@ import Referee from "@/app/Referee/referee"
 const verticalAxis = ["1","2","3","4","5","6","7","8"];
 const horizontalAxis = ['a','b','c','d','e','f','g','h'];
 
-interface Piece{
+export interface Piece{
     image: string
     x: number
     y: number
@@ -146,7 +146,7 @@ export default function Chessboard() {
             setPieces((value) => {
                 const pieces = value.map(p=>{
                     if(p.x === gridX && p.y === gridY){
-                        const valid = referee.isValueMove(gridX, gridY, x,y, p.type, p.team)
+                        const valid = referee.isValueMove(gridX, gridY, x,y, p.type, p.team,value)
                         if (valid){
                             p.x = x
                             p.y = y
