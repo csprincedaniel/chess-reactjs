@@ -1,0 +1,46 @@
+#chessboard .tile {
+    width: 62.5px;
+    height: 62.5px;
+
+
+    display:grid;
+    place-content: center;
+    /* REMOVED the background-color from here */
+}
+
+#chessboard .black-tile {
+    background-color: rgb(27, 79, 27); /* Dark squares */
+}
+
+#chessboard .white-tile {
+    background-color: white; /* Light squares */
+}
+
+.chess-piece{
+    width:60px;
+    height:60px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60px;
+}
+
+
+.chess-piece:hover{
+    cursor: grab;
+}
+
+
+
+.chess-piece:active{
+    cursor: grabbing;
+}
+
+
+
+.tile img{
+    width:60px;
+        /* Hide broken images (alt text and icon) */
+        display: inline-block;
+        overflow: hidden;
+        position: relative;
+}
